@@ -8,3 +8,32 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10 # 최근 요청 10회
+        failureRateThreshold: 15 # 실패율이 15% 넘는 경우에 open
+        permittedNumberOfCallsInHalfOpenState: 5 # Half-Open 상태에서 허용할 요청 개수
+        registerHealthIndicator: true  # Actuator의 Health Indicator 활성화
+        minimumNumberOfCalls: 5  # Circuit Breaker가 활성화되기 위한 최소 요청 개수
+        waitDurationInOpenState: 10s  # Open 상태 후 Half-Open으로 전환되기까지 대기 시간
+        automaticTransitionFromOpenToHalfOpenEnabled: true  # Open 상태에서 자동으로 Half-Open 상태로 이동
+        recordExceptions: # 실패로 간주할 예외 목록
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.HttpServerErrorException
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "*" # 테스트를 위해 actuator 전체 노출
+
+  health:
+    circuitbreakers:
+      enabled: true # circuitbreakers 정보 노출 (/actuator/health/circuitbreakers)
