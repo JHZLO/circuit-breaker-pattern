@@ -21,10 +21,10 @@ resilience4j:
         minimumNumberOfCalls: 5  # Circuit Breaker가 활성화되기 위한 최소 요청 개수
         waitDurationInOpenState: 10s  # Open 상태 후 Half-Open으로 전환되기까지 대기 시간
         automaticTransitionFromOpenToHalfOpenEnabled: true  # Open 상태에서 자동으로 Half-Open 상태로 이동
-        recordExceptions: # 실패로 간주할 예외 목록
-          - java.io.IOException
-          - java.util.concurrent.TimeoutException
-          - org.springframework.web.client.HttpServerErrorException
+        ignoreExceptions: # 400 에러는 서킷 브레이커에서 무시
+          - org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest
+        recordExceptions: # 500 에러는 서킷 브레이커 조건으로 사용
+          - org.springframework.web.reactive.function.client.WebClientResponseException.InternalServerError
 
 
 management:
