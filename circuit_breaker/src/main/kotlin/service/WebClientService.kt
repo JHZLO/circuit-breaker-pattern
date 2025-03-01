@@ -1,56 +1,70 @@
 package com.jhzlo.service
 
+import com.jhzlo.dto.ResponseStats
+import com.jhzlo.entity.RequestStats
+import com.jhzlo.repository.RequestStatsRepository
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
-import java.util.concurrent.atomic.AtomicInteger
 
 @Service
 class WebClientService(
-    private val webClient: WebClient
+    private val webClient: WebClient,
+    private val requestStatsRepository: RequestStatsRepository
 ) {
     companion object {
         const val API = "/api/random-error"
     }
-    private val successCount = AtomicInteger(0)
-    private val badRequestCount = AtomicInteger(0)
-    private val internalServerErrorCount = AtomicInteger(0)
-    private val circuitBreakerBlockedCount = AtomicInteger(0)
 
     @CircuitBreaker(name = "default", fallbackMethod = "fallbackResponse")
+    @Transactional
     fun fetchData(): Mono<String> {
+        val stats = RequestStats()
 
         return webClient.get()
-            .uri("/api/random-error")
+            .uri(API)
             .retrieve()
             .onStatus({ status -> status.is4xxClientError }) { response ->
                 // 400 에러
-                badRequestCount.incrementAndGet()
+                stats.incrementBadRequest()
                 println("400 ERROR: ${response.statusCode()}")
                 Mono.empty()
             }
             .onStatus({ status -> status.is5xxServerError }) { response ->
                 // 500 에러
-                internalServerErrorCount.incrementAndGet()
+                stats.incrementInternalServerError()
                 println("500 ERROR: ${response.statusCode()}")
                 Mono.empty()
             }
             .bodyToMono(String::class.java)
             .doOnSuccess {
                 // 요청 성공
-                successCount.incrementAndGet()
+                stats.incrementSuccess()
             }
             .doOnError { error ->
                 // CircuitBreaker로 인해 실패
                 if (error is io.github.resilience4j.circuitbreaker.CallNotPermittedException) {
-                    circuitBreakerBlockedCount.incrementAndGet()
+                    stats.incrementCircuitBreakerBlocked()
                 }
             }
     }
 
     fun fallbackResponse(ex: Throwable): Mono<String> {
         return Mono.just("Fallback: (${ex.message})")
+    }
+
+    fun getStats(id: Long): ResponseStats {
+        val stats = requestStatsRepository.findById(id).orElseThrow {
+            IllegalArgumentException("null")
+        }
+        val responseStats = ResponseStats(
+            stats.successCount,
+            stats.badRequestCount,
+            stats.internalServerErrorCount,
+            stats.circuitBreakerBlockedCount
+        )
+        return responseStats
     }
 }
