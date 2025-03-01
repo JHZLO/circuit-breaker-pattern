@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController
 class ClientController(
     private val webClientService: WebClientService
 ) {
-    @GetMapping("/test")
-    fun callExternalApi(): String {
-        return webClientService.fetchData().block() ?: "Error"
+    @GetMapping("/test/{id}")
+    fun callExternalApi(@PathVariable id: Long): String {
+        return webClientService.fetchData(id).block() ?: "Error"
     }
 
     @GetMapping("/stats/{id}")

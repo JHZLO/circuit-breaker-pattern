@@ -20,8 +20,10 @@ class WebClientService(
 
     @CircuitBreaker(name = "default", fallbackMethod = "fallbackResponse")
     @Transactional
-    fun fetchData(): Mono<String> {
-        val stats = RequestStats()
+    fun fetchData(id: Long): Mono<String> {
+        val stats = requestStatsRepository.findById(id).orElseGet {
+            RequestStats(id = id).also { requestStatsRepository.save(it) }
+        }
 
         return webClient.get()
             .uri(API)
