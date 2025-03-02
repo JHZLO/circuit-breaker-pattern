@@ -3,7 +3,7 @@ package com.jhzlo.entity
 import com.jhzlo.dto.ResponseStats
 import java.util.concurrent.atomic.AtomicInteger
 
-object RequestStats{
+object RequestStats {
     private val successCount = AtomicInteger(0)
     private val badRequestCount = AtomicInteger(0)
     private val internalServerErrorCount = AtomicInteger(0)

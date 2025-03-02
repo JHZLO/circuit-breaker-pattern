@@ -1,6 +1,6 @@
 package com.jhzlo.dto
 
-data class ResponseStats (
+data class ResponseStats(
     val successCount: Int,
     val badRequestCount: Int,
     val internalServerErrorCount: Int,

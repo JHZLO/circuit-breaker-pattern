@@ -13,12 +13,12 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @Service
-class WebClientService(
+class CircuitBreakerService(
     private val webClient: WebClient,
     private val circuitBreakerRegistry: CircuitBreakerRegistry
 ) {
     companion object {
-        private val logger = LoggerFactory.getLogger(WebClientService::class.java)
+        private val logger = LoggerFactory.getLogger(CircuitBreakerService::class.java)
         const val API = "/api/random-error"
     }
 
