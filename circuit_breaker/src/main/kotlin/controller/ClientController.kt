@@ -13,8 +13,8 @@ class ClientController(
     private val webClientService: WebClientService
 ) {
     @GetMapping("/test")
-    fun callExternalApi(): String {
-        return webClientService.fetchData().block() ?: "Error"
+    fun callExternalApi() {
+        webClientService.fetchData()
     }
 
     @GetMapping("/stats")

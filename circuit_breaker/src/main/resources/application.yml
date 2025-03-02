@@ -19,7 +19,7 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 5 # Half-Open 상태에서 허용할 요청 개수
         registerHealthIndicator: true  # Actuator의 Health Indicator 활성화
         minimumNumberOfCalls: 5  # Circuit Breaker가 활성화되기 위한 최소 요청 개수
-        waitDurationInOpenState: 10s  # Open 상태 후 Half-Open으로 전환되기까지 대기 시간
+        waitDurationInOpenState: 5s  # Open 상태 후 Half-Open으로 전환되기까지 대기 시간
         automaticTransitionFromOpenToHalfOpenEnabled: true  # Open 상태에서 자동으로 Half-Open 상태로 이동
         ignoreExceptions: # 400 에러는 서킷 브레이커에서 무시
           - org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest

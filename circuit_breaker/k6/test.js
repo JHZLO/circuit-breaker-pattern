@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 export let options = {
-    vus: 10,  // 동시 사용자 수
+    vus: 1,  // 동시 사용자 수
     iterations: 1000, // 총 1000번 요청
 };
 

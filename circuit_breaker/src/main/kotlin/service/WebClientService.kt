@@ -2,11 +2,11 @@ package com.jhzlo.service
 
 import com.jhzlo.dto.ResponseStats
 import com.jhzlo.entity.RequestStats
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
-import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @Service
 class WebClientService(
@@ -17,31 +17,30 @@ class WebClientService(
     }
 
     @CircuitBreaker(name = "default", fallbackMethod = "fallbackResponse")
-    fun fetchData(): Mono<String> {
-        return webClient.get()
+    fun fetchData() {
+        webClient.get()
             .uri(API)
             .retrieve()
-            .onStatus({ status -> status.is4xxClientError }) {
-                RequestStats.incrementBadRequest()
-                Mono.empty()
-            }
-            .onStatus({ status -> status.is5xxServerError }) {
-                RequestStats.incrementInternalServerError()
-                Mono.empty()
-            }
             .bodyToMono(String::class.java)
-            .doOnSuccess {
-                RequestStats.incrementSuccess()
-            }
-            .doOnError { error ->
-                if (error is io.github.resilience4j.circuitbreaker.CallNotPermittedException) {
-                    RequestStats.incrementCircuitBreakerBlocked()
-                }
-            }
+            .block()
+
+        RequestStats.incrementSuccess()
     }
 
-    fun fallbackResponse(ex: Throwable): Mono<String> {
-        return Mono.just("Fallback: (${ex.message})")
+    private fun fallbackResponse(exception: WebClientResponseException) {
+        when (exception.statusCode.value()) {
+            400 -> RequestStats.incrementBadRequest()
+            500 -> RequestStats.incrementInternalServerError()
+        }
+    }
+
+    private fun fallbackResponse(exception: CallNotPermittedException) {
+        RequestStats.incrementCircuitBreakerBlocked()
+        println("Circuit Breaker open")
+    }
+
+    private fun fallback(throwable: Throwable) {
+        println("default fallback method")
     }
 
     fun getStats(): ResponseStats {
