@@ -1,4 +1,4 @@
-# 🚦 Circuit Breaker를 활용하여 MSA 환경에서 장애 전파 막기 🚦
+# 🚦 MSA 환경에서 Circuit Breaker 활용하기 🚦
 
 서비스 하나에서 일어난 장애가 어떻게 다른 서비스로 장애가 전파될까?
 
