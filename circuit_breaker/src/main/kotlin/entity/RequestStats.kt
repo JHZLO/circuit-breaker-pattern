@@ -1,36 +1,24 @@
 package com.jhzlo.entity
 
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import com.jhzlo.dto.ResponseStats
+import java.util.concurrent.atomic.AtomicInteger
 
-@Entity
-@Table(name = "request_stats")
-data class RequestStats(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+object RequestStats{
+    private val successCount = AtomicInteger(0)
+    private val badRequestCount = AtomicInteger(0)
+    private val internalServerErrorCount = AtomicInteger(0)
+    private val circuitBreakerBlockedCount = AtomicInteger(0)
 
-    var successCount: Int = 0,
-    var badRequestCount: Int = 0,
-    var internalServerErrorCount: Int = 0,
-    var circuitBreakerBlockedCount: Int = 0
-) {
-    fun incrementSuccess() {
-        successCount++
-    }
-
-    fun incrementBadRequest() {
-        badRequestCount++
-    }
-
-    fun incrementInternalServerError() {
-        internalServerErrorCount++
-    }
-
-    fun incrementCircuitBreakerBlocked() {
-        circuitBreakerBlockedCount++
+    fun incrementSuccess() = successCount.incrementAndGet()
+    fun incrementBadRequest() = badRequestCount.incrementAndGet()
+    fun incrementInternalServerError() = internalServerErrorCount.incrementAndGet()
+    fun incrementCircuitBreakerBlocked() = circuitBreakerBlockedCount.incrementAndGet()
+    fun getStats(): ResponseStats {
+        return ResponseStats(
+            successCount.get(),
+            badRequestCount.get(),
+            internalServerErrorCount.get(),
+            circuitBreakerBlockedCount.get()
+        )
     }
 }

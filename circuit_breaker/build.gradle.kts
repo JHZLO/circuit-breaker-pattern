@@ -22,12 +22,14 @@ repositories {
 extra["springCloudVersion"] = "2024.0.0"
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("jakarta.servlet:jakarta.servlet-api:5.0.0")
     implementation("org.springframework.boot:spring-boot-starter-webflux") // web client
 
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
+
+
 
     // circuit breaker
     implementation("io.github.resilience4j:resilience4j-reactor:2.2.0")
